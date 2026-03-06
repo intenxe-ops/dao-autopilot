@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DAO Autopilot
 
-## Getting Started
+Autonomous governance infrastructure for DAOs. AI agents that generate proposals, analyze voting patterns, and automate operations.
 
-First, run the development server:
+## What It Does
 
+- **AI Proposal Generation**: Generate governance proposals in minutes by learning from past successful proposals
+- **Voting Analytics**: Real-time insights on voter behavior and participation patterns  
+- **Smart Alerts**: Never miss quorum or important governance events
+
+## Tech Stack
+
+- Next.js 14 + TypeScript
+- Claude AI (Anthropic)
+- Snapshot API
+- Supabase
+- Tailwind CSS
+
+## Status
+
+🚧 **Day 1 Complete** - Working proposal generation API
+
+## Setup
 ```bash
+npm install
+cp .env.local.example .env.local
+# Add your API keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API Usage
+```bash
+curl -X POST http://localhost:3000/api/proposals/generate \
+  -H "Content-Type: application/json" \
+  -d '{"daoSpace": "arbitrumfoundation.eth", "idea": "Your proposal idea"}'
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Building in public.** Follow progress: [@intenxe-ops](https://github.com/intenxe-ops)
