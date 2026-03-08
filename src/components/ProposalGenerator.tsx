@@ -1,12 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ProposalGenerator() {
   const [daoSpace, setDaoSpace] = useState("");
   const [idea, setIdea] = useState("");
   const [proposal, setProposal] = useState("");
   const [loading, setLoading] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (loading) {
+      setElapsedTime(0);
+      interval = setInterval(() => {
+        setElapsedTime(prev => prev + 0.1);
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const handleGenerate = async () => {
     if (!daoSpace || !idea) return;
@@ -99,7 +112,7 @@ export default function ProposalGenerator() {
                 className="group w-full px-8 py-5 bg-white text-black font-mono text-xs tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white"
               >
                 <span className="inline-block group-hover:translate-x-0.5 transition-transform">
-                  {loading ? "EXECUTING..." : "GENERATE PROPOSAL"}
+                  {loading ? `EXECUTING... ${elapsedTime.toFixed(1)}s` : "GENERATE PROPOSAL"}
                 </span>
               </button>
             )}
