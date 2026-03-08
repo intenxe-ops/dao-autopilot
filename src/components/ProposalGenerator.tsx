@@ -40,67 +40,80 @@ export default function ProposalGenerator() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Input Form */}
-      <div className="bg-black/80 border border-red-900/50 rounded-none p-8 shadow-2xl shadow-red-500/10">
-        <div className="space-y-6">
+      <div className="bg-[#0f0f0f] border border-white/[0.08] p-12">
+        <div className="space-y-8">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-red-400 mb-2">
+            <label className="block text-[10px] font-mono tracking-[0.2em] text-[#666666] mb-4">
               DAO SNAPSHOT SPACE
             </label>
             <input
               type="text"
               value={daoSpace}
               onChange={(e) => setDaoSpace(e.target.value)}
-              placeholder="e.g., arbitrumfoundation.eth"
-              className="w-full px-4 py-3 bg-black border border-red-900/50 rounded-none text-red-100 placeholder-red-900/50 focus:outline-none focus:border-red-500 transition-colors font-mono"
+              placeholder="arbitrumfoundation.eth"
+              className="w-full px-0 py-4 bg-transparent border-b border-white/[0.08] text-white placeholder-[#404040] focus:outline-none focus:border-white/20 transition-colors font-light text-lg tracking-tight"
             />
-            <p className="text-xs text-red-900/70 mt-2 font-mono">
-              ENTER SNAPSHOT SPACE NAME (USUALLY ENDS IN .ETH)
+            <p className="text-xs text-[#404040] mt-3 font-light tracking-wide">
+              Enter Snapshot space name (usually ends in .eth)
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-red-400 mb-2">
+            <label className="block text-[10px] font-mono tracking-[0.2em] text-[#666666] mb-4">
               PROPOSAL IDEA
             </label>
             <textarea
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
-              placeholder="e.g., Increase grants budget by 10%"
-              rows={4}
-              className="w-full px-4 py-3 bg-black border border-red-900/50 rounded-none text-red-100 placeholder-red-900/50 focus:outline-none focus:border-red-500 transition-colors resize-none font-mono"
+              placeholder="Describe your proposal..."
+              rows={6}
+              className="w-full px-0 py-4 bg-transparent border-b border-white/[0.08] text-white placeholder-[#404040] focus:outline-none focus:border-white/20 transition-colors resize-none font-light text-lg leading-relaxed tracking-tight"
             />
-            <p className="text-xs text-red-900/70 mt-2 font-mono">
-              DESCRIBE YOUR PROPOSAL IDEA IN A FEW SENTENCES
+            <p className="text-xs text-[#404040] mt-3 font-light tracking-wide">
+              Describe your proposal idea in a few sentences
             </p>
           </div>
 
-          <button
-            onClick={handleGenerate}
-            disabled={loading || !daoSpace || !idea}
-            className="w-full px-8 py-4 bg-red-600 text-black font-bold rounded-none hover:bg-red-500 transition-all shadow-lg shadow-red-600/50 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-mono"
-          >
-            {loading ? "EXECUTING..." : "GENERATE PROPOSAL"}
-          </button>
+          <div className="pt-4">
+            <button
+              onClick={handleGenerate}
+              disabled={loading || !daoSpace || !idea}
+              className="group w-full px-8 py-5 bg-white text-black font-mono text-xs tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white"
+            >
+              <span className="inline-block group-hover:translate-x-0.5 transition-transform">
+                {loading ? "EXECUTING..." : "GENERATE PROPOSAL"}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Generated Proposal */}
       {proposal && (
-        <div className="bg-black/80 border border-red-900/50 rounded-none p-8 shadow-2xl shadow-red-500/10">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-red-400 font-mono uppercase tracking-wider">GENERATED PROPOSAL</h3>
+        <div className="bg-[#0f0f0f] border border-white/[0.08] p-12">
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <p className="text-[10px] font-mono tracking-[0.2em] text-[#666666] mb-2">
+                OUTPUT
+              </p>
+              <h3 className="text-2xl font-light text-white tracking-tight">
+                Generated Proposal
+              </h3>
+            </div>
             <button
               onClick={handleCopy}
-              className="px-4 py-2 bg-black text-red-400 rounded-none hover:bg-red-950 transition-all border border-red-900/50 text-xs font-mono uppercase tracking-wider"
+              className="group px-6 py-3 bg-transparent text-[#808080] hover:text-white border border-white/[0.08] hover:bg-white/5 transition-all text-xs font-mono tracking-[0.15em]"
             >
-              COPY TO CLIPBOARD
+              <span className="inline-block group-hover:translate-x-0.5 transition-transform">
+                COPY
+              </span>
             </button>
           </div>
           
-          <div className="bg-black rounded-none p-6 border border-red-900/50 overflow-x-auto">
-            <pre className="text-red-100 whitespace-pre-wrap font-mono text-sm">
+          <div className="bg-black/40 p-8 border border-white/[0.05] overflow-x-auto">
+            <pre className="text-[#cccccc] whitespace-pre-wrap font-mono text-sm leading-relaxed">
               {proposal}
             </pre>
           </div>
