@@ -1,167 +1,201 @@
-# DAO Autopilot 🤖
+# DAO AUTOPILOT
 
-> **AI-powered governance proposal generator that learns from your DAO's history**
+AI-driven governance infrastructure. Generate proposals. Analyze votes. Automate operations.
 
-Generate professional DAO proposals in 15 seconds. Trained on 13,000+ DAOs via Snapshot.
+## CAPABILITIES
 
-[![GitHub](https://img.shields.io/github/stars/intenxe-ops/dao-autopilot?style=social)](https://github.com/intenxe-ops/dao-autopilot)
+**Proposal Generation**
+- Context-aware AI proposal creation using Claude
+- DAO-specific formatting and tone adaptation
+- Historical proposal pattern analysis
+- Real-time execution timer
 
----
+**Governance Intelligence**
+- Live Snapshot voting statistics
+- 20 pre-loaded top DAOs (Arbitrum, Uniswap, ENS, Gitcoin, Optimism, etc.)
+- Real-time metrics: quorum %, voting periods, success rates
+- GraphQL integration with Snapshot API
 
-## ⚡ What It Does
+**Operator Interface**
+- Ghost Layer aesthetic: calm, lethal, zero corporate theater
+- Mobile-responsive tactical layout
+- Smart input locking during execution
+- Scrollable output with one-click copy
 
-DAO Autopilot generates governance proposals by:
-1. **Learning from your DAO** - Pulls recent proposals from any Snapshot space
-2. **Analyzing patterns** - Claude AI studies structure, tone, and format
-3. **Generating proposals** - Creates new proposals matching your DAO's style
+## STACK
 
-**Example:** Enter `arbitrumfoundation.eth` + your idea → Get a full Arbitrum-style proposal in 15 seconds.
+```
+Frontend:     Next.js 16, React 19, TypeScript
+Styling:      Tailwind v4, Ghost Layer design system
+AI:           Anthropic Claude API
+Data:         Snapshot GraphQL, Supabase
+Deploy:       Vercel-ready
+```
 
----
+## SETUP
 
-## 🎯 Why This Exists
+**Prerequisites**
+- Node.js 20+
+- Anthropic API key
+- Supabase project (optional, for future features)
 
-**The Problem:**
-- Writing governance proposals takes hours
-- Generic templates don't match DAO culture
-- Contributors struggle with formatting/structure
-
-**The Solution:**
-- AI that learns each DAO's unique style
-- Instant generation with proper structure
-- Works with any DAO on Snapshot (13,000+)
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18+
-- Claude API key ([get one here](https://console.anthropic.com))
-- Supabase account (free tier works)
-
-### Installation
+**Install**
 ```bash
-# Clone the repo
 git clone https://github.com/intenxe-ops/dao-autopilot.git
 cd dao-autopilot
-
-# Install dependencies
 npm install
+```
 
-# Set up environment variables
+**Environment**
+```bash
 cp .env.example .env.local
-# Add your API keys to .env.local
+```
 
-# Run the development server
+Required variables:
+```
+ANTHROPIC_API_KEY=your_key_here
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
+```
+
+**Run**
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Navigate to `http://localhost:3000`
 
----
+## ARCHITECTURE
 
-## 🏗️ Tech Stack
-
-- **Frontend:** Next.js 14, React, Tailwind CSS, Shadcn/ui
-- **Backend:** Next.js API routes
-- **AI:** Claude Sonnet 4 (Anthropic)
-- **Data:** Snapshot GraphQL API
-- **Database:** Supabase (PostgreSQL)
-- **Deployment:** Vercel
-
----
-
-## 📊 Features
-
-### ✅ Current
-- AI proposal generation from any DAO's history
-- Snapshot API integration (13,000+ DAOs)
-- Copy to clipboard
-- Markdown output
-
-### 🚧 Coming Soon
-- DAO selector dropdown (popular DAOs)
-- Markdown preview toggle
-- Voting analytics dashboard
-- Telegram alerts for governance events
-- Multi-DAO comparison
-
----
-
-## 🎯 Use Cases
-
-**For Individual Contributors:**
-- Draft proposals quickly for your DAO
-- Learn from successful proposal patterns
-- Improve proposal quality
-
-**For DAOs:**
-- Standardize proposal formats
-- Reduce contributor friction
-- Automate governance operations
-
----
-
-## 🔧 Configuration
-
-### Environment Variables
-```bash
-# Claude AI
-ANTHROPIC_API_KEY=your_key_here
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── proposals/        → Proposal generation endpoint
+│   │   └── snapshot/         → Snapshot data fetching
+│   ├── dashboard/            → Future: multi-DAO dashboard
+│   ├── globals.css          → Ghost Layer color system
+│   ├── layout.tsx           → Root layout
+│   └── page.tsx             → Landing + hero
+├── components/
+│   └── ProposalGenerator.tsx → Main UI (dropdown + stats + form)
+├── lib/
+│   ├── claude.ts            → Claude API client
+│   ├── dao-data.ts          → Top 20 DAO constants
+│   ├── snapshot-api.ts      → Snapshot GraphQL queries (stats)
+│   ├── snapshot.ts          → Snapshot utilities
+│   ├── supabase.ts          → DB client (future use)
+│   └── utils.ts             → Shared utilities
+└── types/
+    └── index.ts             → TypeScript definitions
 ```
 
-### Database Setup
+## USAGE
 
-Run the SQL schema from `/supabase/schema.sql` in your Supabase dashboard.
+**Generate Proposal**
+1. Select DAO from dropdown or enter custom Snapshot space
+2. Review live governance stats (quorum, voting period, success rate)
+3. Describe proposal idea
+4. Generate → AI creates full governance proposal
+5. Copy and paste into Snapshot
+
+**DAO Stats**
+- Fetches last 20 proposals from selected DAO
+- Calculates average quorum participation
+- Shows typical voting duration
+- Displays proposal success rate
+- Updates in real-time on DAO selection
+
+## ROADMAP
+
+**Phase 1: Generation** (Complete ✓)
+- AI proposal generation
+- DAO selector with stats
+- Ghost Layer UI
+
+**Phase 2: Intelligence** (In Progress)
+- Voting pattern analysis
+- Historical proposal learning
+- Sentiment scoring
+- Template library
+
+**Phase 3: Automation** (Planned)
+- Auto-monitor quorum thresholds
+- Proposal lifecycle tracking
+- Agent voting assistant
+- Multi-DAO dashboard
+
+## DESIGN PHILOSOPHY
+
+Ghost Layer aesthetic principles:
+- Calm lethal energy
+- Zero corporate speak
+- Operator-grade interfaces
+- Maximum information density
+- Minimal friction workflows
+
+Color system: Pure grayscale (`#0a0a0a` → `#ffffff`)  
+Typography: Thin display type, tactical mono tracking  
+Spacing: Generous breathing room, sharp edges  
+Interactions: Subtle, purposeful, no theater  
+
+## API STRUCTURE
+
+**POST** `/api/proposals/generate`
+```json
+{
+  "daoSpace": "gitcoindao.eth",
+  "idea": "Allocate 100K GTC for developer tooling grants"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "proposal": "# [Proposal] ...",
+  "metadata": {
+    "daoSpace": "gitcoindao.eth",
+    "generatedAt": "2026-03-09T14:30:00Z"
+  }
+}
+```
+
+## DEPLOYMENT
+
+**Vercel** (Recommended)
+```bash
+vercel --prod
+```
+
+Environment variables required:
+- `ANTHROPIC_API_KEY`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## CONTRIBUTING
+
+Building in public. Day-by-day ops documentation.
+
+**Current focus:**
+- Voting pattern analysis integration
+- Proposal template library
+- Historical learning layer
+
+**Stack requirements:**
+- TypeScript strict mode
+- Ghost Layer design compliance
+- Zero fluff, maximum utility
+- Operator-first UX
+
+## LICENSE
+
+MIT
 
 ---
 
-## 📖 How It Works
+**Building the operator interface for DAO governance.**
 
-1. **User enters DAO space** (e.g., `arbitrumfoundation.eth`) and proposal idea
-2. **System fetches** last 5 proposals from Snapshot API
-3. **Claude analyzes** proposal structure, tone, sections, formatting
-4. **AI generates** new proposal matching the DAO's style
-5. **User gets** formatted proposal ready to post
+Not just tools. Cognitive infrastructure.
 
----
-
-## 🤝 Contributing
-
-This is an open-source project built in public. Contributions welcome.
-
-**Current focus areas:**
-- Frontend UI/UX improvements
-- Additional DAO integrations (Tally, Aragon)
-- Analytics features
-- Performance optimizations
-
----
-
-## 📝 License
-
-MIT License - see [LICENSE](LICENSE) for details
-
----
-
-## 🔗 Links
-
-- **Twitter:** [@intenxe-ops](https://twitter.com/intenxe_ops)
-- **GitHub:** [intenxe-ops](https://github.com/intenxe-ops)
-
----
-
-## ⚡ Built by [@intenxe-ops](https://github.com/intenxe-ops)
-
-Building autonomous governance infrastructure for DAOs.
-
-*Day 2 of building in public.*
-
----
-
-**Questions?** Open an issue or DM on Twitter.
+*@intenxe-ops*
