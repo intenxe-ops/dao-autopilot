@@ -14,6 +14,8 @@ export default function ProposalGenerator() {
   const [searchTerm, setSearchTerm] = useState("");
   const [daoStats, setDaoStats] = useState<DAOStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
 
   // Timer effect
   useEffect(() => {
@@ -79,6 +81,8 @@ export default function ProposalGenerator() {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(proposal);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDownload = () => {
@@ -91,6 +95,8 @@ export default function ProposalGenerator() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    setDownloaded(true);
+    setTimeout(() => setDownloaded(false), 2000);
   };
 
   return (
@@ -118,7 +124,7 @@ export default function ProposalGenerator() {
                   type="button"
                   onClick={() => setShowDropdown(!showDropdown)}
                   disabled={loading || !!proposal}
-                  className="px-4 py-2 border-b border-white/[0.08] text-[#666666] hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border-b border-white/[0.08] text-[#666666] hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M6 9l6 6 6-6"/>
@@ -146,7 +152,7 @@ export default function ProposalGenerator() {
                       <button
                         key={dao.id}
                         onClick={() => handleDAOSelect(dao.id)}
-                        className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors border-b border-white/[0.03] group"
+                        className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors border-b border-white/[0.03] group cursor-pointer"
                       >
                         <div className="flex justify-between items-center">
                           <div>
@@ -255,7 +261,7 @@ export default function ProposalGenerator() {
                   setIdea("");
                   setDaoStats(null);
                 }}
-                className="group w-full px-8 py-5 bg-transparent text-white border border-white/[0.08] font-mono text-xs tracking-[0.2em] hover:bg-white/5 transition-all duration-200"
+                className="group w-full px-8 py-5 bg-transparent text-white border border-white/[0.08] font-mono text-xs tracking-[0.2em] hover:bg-white/5 transition-all duration-200 cursor-pointer"
               >
                 <span className="inline-block group-hover:translate-x-0.5 transition-transform">
                   RESET / NEW PROPOSAL
@@ -265,7 +271,7 @@ export default function ProposalGenerator() {
               <button
                 onClick={handleGenerate}
                 disabled={loading || !daoSpace || !idea}
-                className="group w-full px-8 py-5 bg-white text-black font-mono text-xs tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white"
+                className="group w-full px-8 py-5 bg-white text-black font-mono text-xs tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white cursor-pointer"
               >
                 <span className="inline-block group-hover:translate-x-0.5 transition-transform">
                   {loading ? `EXECUTING... ${elapsedTime.toFixed(1)}s` : "GENERATE PROPOSAL"}
@@ -291,24 +297,36 @@ export default function ProposalGenerator() {
             <div className="flex gap-3">
               <button
                 onClick={handleCopy}
-                className="group px-4 py-3 bg-transparent text-[#808080] hover:text-white border border-white/[0.08] hover:bg-white/5 transition-all"
+                className="group px-4 py-3 bg-transparent text-[#808080] hover:text-white border border-white/[0.08] hover:bg-white/5 transition-all cursor-pointer"
                 title="Copy to clipboard"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="group-hover:translate-x-0.5 transition-transform">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                </svg>
+                {copied ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="group-hover:translate-x-0.5 transition-transform">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                )}
               </button>
               <button
                 onClick={handleDownload}
-                className="group px-4 py-3 bg-transparent text-[#808080] hover:text-white border border-white/[0.08] hover:bg-white/5 transition-all"
+                className="group px-4 py-3 bg-transparent text-[#808080] hover:text-white border border-white/[0.08] hover:bg-white/5 transition-all cursor-pointer"
                 title="Download as .md"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="group-hover:translate-y-0.5 transition-transform">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
+                {downloaded ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="group-hover:translate-y-0.5 transition-transform">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                )}
               </button>
             </div>
           </div>
