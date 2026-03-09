@@ -81,6 +81,18 @@ export default function ProposalGenerator() {
     navigator.clipboard.writeText(proposal);
   };
 
+  const handleDownload = () => {
+    const blob = new Blob([proposal], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${daoSpace.replace(/\.eth$/, "")}-proposal-${Date.now()}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-8">
       {/* Input Form */}
@@ -276,14 +288,29 @@ export default function ProposalGenerator() {
                 Generated Proposal
               </h3>
             </div>
-            <button
-              onClick={handleCopy}
-              className="group w-full sm:w-auto px-6 py-3 bg-transparent text-[#808080] hover:text-white border border-white/[0.08] hover:bg-white/5 transition-all text-xs font-mono tracking-[0.15em]"
-            >
-              <span className="inline-block group-hover:translate-x-0.5 transition-transform">
-                COPY
-              </span>
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleCopy}
+                className="group px-4 py-3 bg-transparent text-[#808080] hover:text-white border border-white/[0.08] hover:bg-white/5 transition-all"
+                title="Copy to clipboard"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="group-hover:translate-x-0.5 transition-transform">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+              <button
+                onClick={handleDownload}
+                className="group px-4 py-3 bg-transparent text-[#808080] hover:text-white border border-white/[0.08] hover:bg-white/5 transition-all"
+                title="Download as .md"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="group-hover:translate-y-0.5 transition-transform">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </button>
+            </div>
           </div>
           
           <div className="bg-black/40 p-4 md:p-8 border border-white/[0.05] overflow-y-auto max-h-[400px] md:max-h-[600px]">
