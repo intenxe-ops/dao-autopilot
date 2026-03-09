@@ -46,6 +46,39 @@ export default function ProposalGenerator() {
     dao.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Auto-close dropdown when no matches and user typed something
+  useEffect(() => {
+    if (searchTerm && filteredDAOs.length === 0 && showDropdown) {
+      const timer = setTimeout(() => setShowDropdown(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchTerm, filteredDAOs.length, showDropdown]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showDropdown && !target.closest('.dao-dropdown-container')) {
+        setShowDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showDropdown]);
+
+  // Close dropdown on Enter or Escape
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (showDropdown && (event.key === 'Escape' || event.key === 'Enter')) {
+        setShowDropdown(false);
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showDropdown]);
+
   const handleDAOSelect = (space: string) => {
     setDaoSpace(space);
     setShowDropdown(false);
@@ -109,7 +142,7 @@ export default function ProposalGenerator() {
               DAO SNAPSHOT SPACE
             </label>
             
-            <div className="relative">
+            <div className="relative dao-dropdown-container">
               <div className="flex gap-2">
                 <input
                   type="text"
