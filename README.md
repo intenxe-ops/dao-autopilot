@@ -17,6 +17,9 @@
 - Live Snapshot voting statistics
 - 20 pre-loaded top DAOs (Arbitrum, Uniswap, ENS, Gitcoin, Optimism, etc.)
 - Real-time metrics: quorum %, voting periods, success rates
+- 🕵️ Voting pattern analysis: power distribution, proposal success patterns
+- 🔑 Keyword extraction: risk signals vs success signals
+- 🧬 Behavioral intelligence: voter profiling, governance activity tracking
 - GraphQL integration with Snapshot API
 
 ### 🖥️ Operator Interface
@@ -92,6 +95,8 @@ src/
 │   ├── snapshot-api.ts       → Snapshot GraphQL queries (stats)
 │   ├── snapshot.ts           → Snapshot utilities
 │   ├── supabase.ts           → DB client (future use)
+|   ├── claude.ts             → Claude API client (intelligence-aware)
+|   ├── voting-analysis.ts    → Voting pattern analysis + behavioral intelligence
 │   └── utils.ts              → Shared utilities
 └── types/
     └── index.ts              → TypeScript definitions
@@ -104,16 +109,18 @@ src/
 **Generate Proposal**
 1. Select DAO from dropdown or enter custom Snapshot space
 2. Review live governance stats *(quorum, voting period, success rate)*
-3. Describe proposal idea
-4. Generate → AI creates full governance proposal
-5. Copy → paste into Snapshot. Done.
+3. 🔍 Analyze voting intelligence *(power distribution, success patterns, keywords)*
+4. Describe proposal idea
+5. Generate → AI creates context-aware proposal optimized for DAO patterns
+6. Copy/download proposal for Snapshot
 
-**DAO Stats**
-- Fetches last 20 proposals from selected DAO
-- Calculates average quorum participation
-- Shows typical voting duration
-- Displays proposal success rate
-- Updates in real-time on DAO selection
+**🧠 Voting Intelligence**
+- Analyzes last 50 proposals + 1000 votes from selected DAO
+- 🐋 Power distribution: identifies whale voters and concentration %
+- 📈 Success patterns: categorizes proposals by type with success rates
+- 🗝️ Keyword analysis: extracts language that correlates with pass/fail outcomes
+- ⚡ Activity level: tracks governance velocity (HIGH/MEDIUM/LOW)
+- 🎯 Agent optimization: uses intelligence to write proposals designed to pass
 
 ---
 
@@ -124,11 +131,12 @@ src/
 - DAO selector with stats
 - Ghost Layer UI
 
-**Phase 2: Intelligence** 🔄 In Progress
+**Phase 2: Intelligence** ✅ Complete
 - Voting pattern analysis
-- Historical proposal learning
-- Sentiment scoring
-- Template library
+- Voter power distribution profiling
+- Proposal category success detection
+- 🔑 Keyword extraction (risk vs success signals)
+- 🤖 Context-aware agent optimization
 
 **Phase 3: Automation** 📌 Planned
 - Auto-monitor quorum thresholds
