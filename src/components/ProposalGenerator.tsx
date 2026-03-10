@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { TOP_DAOS } from "@/lib/dao-data";
 import { fetchDAOStats, type DAOStats } from "@/lib/snapshot-api";
+import { analyzeVotingPatterns, type VotingIntelligence } from "@/lib/voting-analysis";
 
 export default function ProposalGenerator() {
   const [daoSpace, setDaoSpace] = useState("");
@@ -16,6 +17,8 @@ export default function ProposalGenerator() {
   const [loadingStats, setLoadingStats] = useState(false);
   const [copied, setCopied] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
+  const [votingIntel, setVotingIntel] = useState<VotingIntelligence | null>(null);
+  const [loadingIntel, setLoadingIntel] = useState(false);
 
   // Timer effect
   useEffect(() => {
@@ -33,9 +36,21 @@ export default function ProposalGenerator() {
   useEffect(() => {
     if (daoSpace && !loading && !proposal) {
       setLoadingStats(true);
-      fetchDAOStats(daoSpace)
-        .then(stats => setDaoStats(stats))
-        .finally(() => setLoadingStats(false));
+      setLoadingIntel(true);
+      
+      // Fetch both stats and voting intelligence
+      Promise.all([
+        fetchDAOStats(daoSpace),
+        analyzeVotingPatterns(daoSpace)
+      ])
+        .then(([stats, intel]) => {
+          setDaoStats(stats);
+          setVotingIntel(intel);
+        })
+        .finally(() => {
+          setLoadingStats(false);
+          setLoadingIntel(false);
+        });
     }
   }, [daoSpace, loading, proposal]);
 
@@ -268,6 +283,146 @@ export default function ProposalGenerator() {
             </div>
           )}
 
+          {/* Voting Intelligence */}
+          {votingIntel && !proposal && (
+            <div className="bg-black/40 border border-white/[0.05] p-6 md:p-8">
+              <p className="text-[10px] font-mono tracking-[0.2em] text-[#666666] mb-6">
+                VOTING INTELLIGENCE
+              </p>
+
+              {/* Power Distribution */}
+              <div className="mb-8">
+                <p className="text-xs font-mono text-[#808080] mb-3 tracking-wider">
+                  POWER DISTRIBUTION
+                </p>
+                <p className="text-sm text-white mb-4 font-light">
+                  Top 3 voters control{" "}
+                  <span className="text-lg font-normal">{votingIntel.powerConcentration}%</span>{" "}
+                  of voting power
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {votingIntel.topVoters.slice(0, 4).map((voter, i) => (
+                    <div
+                      key={voter.address}
+                      className="flex justify-between items-center text-xs"
+                    >
+                      <span className="text-[#666666] font-mono">
+                        {voter.address.slice(0, 6)}...{voter.address.slice(-4)}
+                      </span>
+                      <span className="text-white font-light">
+                        {voter.votingPower}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Proposal Patterns */}
+              {votingIntel.proposalPatterns.length > 0 && (
+                <div className="mb-8">
+                  <p className="text-xs font-mono text-[#808080] mb-3 tracking-wider">
+                    PROPOSAL SUCCESS PATTERNS
+                  </p>
+                  <div className="space-y-2">
+                    {votingIntel.proposalPatterns.slice(0, 4).map((pattern) => (
+                      <div key={pattern.category} className="flex items-center gap-3">
+                        <span className="text-xs text-[#666666] font-mono min-w-[120px]">
+                          {pattern.category}
+                        </span>
+                        <div className="flex-1 h-1 bg-white/5 relative overflow-hidden">
+                          <div
+                            className="absolute h-full bg-white/20"
+                            style={{ width: `${pattern.successRate}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-white font-light min-w-[40px] text-right">
+                          {pattern.successRate}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Keywords */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Risk Keywords */}
+                {votingIntel.riskKeywords.length > 0 && (
+                  <div>
+                    <p className="text-xs font-mono text-[#808080] mb-3 tracking-wider">
+                      RISK SIGNALS
+                    </p>
+                    <div className="space-y-2">
+                      {votingIntel.riskKeywords.map((keyword) => (
+                        <div key={keyword.word} className="flex items-start gap-2">
+                          <span className="text-white/40 text-xs">⚠</span>
+                          <div className="flex-1">
+                            <span className="text-xs text-[#999999] font-mono">
+                              "{keyword.word}"
+                            </span>
+                            <span className="text-xs text-[#666666] ml-2">
+                              fails {keyword.failureRate}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Success Keywords */}
+                {votingIntel.successKeywords.length > 0 && (
+                  <div>
+                    <p className="text-xs font-mono text-[#808080] mb-3 tracking-wider">
+                      SUCCESS SIGNALS
+                    </p>
+                    <div className="space-y-2">
+                      {votingIntel.successKeywords.map((keyword) => (
+                        <div key={keyword.word} className="flex items-start gap-2">
+                          <span className="text-white/40 text-xs">✓</span>
+                          <div className="flex-1">
+                            <span className="text-xs text-[#999999] font-mono">
+                              "{keyword.word}"
+                            </span>
+                            <span className="text-xs text-[#666666] ml-2">
+                              passes {keyword.successRate}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Activity Level */}
+              <div className="mt-6 pt-6 border-t border-white/[0.05]">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-[#666666] font-mono tracking-wider">
+                    GOVERNANCE ACTIVITY
+                  </span>
+                  <span className={`font-mono ${
+                    votingIntel.governanceActivity === "HIGH"
+                      ? "text-white"
+                      : votingIntel.governanceActivity === "MEDIUM"
+                      ? "text-[#999999]"
+                      : "text-[#666666]"
+                  }`}>
+                    {votingIntel.governanceActivity}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {loadingIntel && daoSpace && !proposal && !votingIntel && (
+            <div className="bg-black/40 border border-white/[0.05] p-6">
+              <p className="text-xs text-[#666666] font-mono tracking-wider animate-pulse">
+                ANALYZING VOTING PATTERNS...
+              </p>
+            </div>
+          )}
+
           <div>
             <label className="block text-[10px] font-mono tracking-[0.2em] text-[#666666] mb-4">
               PROPOSAL IDEA
@@ -293,6 +448,7 @@ export default function ProposalGenerator() {
                   setDaoSpace("");
                   setIdea("");
                   setDaoStats(null);
+                  setVotingIntel(null);
                 }}
                 className="group w-full px-8 py-5 bg-transparent text-white border border-white/[0.08] font-mono text-xs tracking-[0.2em] hover:bg-white/5 transition-all duration-200 cursor-pointer"
               >
