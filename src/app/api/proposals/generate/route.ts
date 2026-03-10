@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProposals } from '@/lib/snapshot';
 import { generateProposal } from '@/lib/claude';
+import { analyzeVotingPatterns } from '@/lib/voting-analysis';
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,18 +29,24 @@ export async function POST(req: NextRequest) {
       `Title: ${p.title}\n\n${p.body}`
     );
 
-    // 2. Generate new proposal using Claude
-    console.log('Generating proposal with Claude...');
+    // 2. Fetch voting intelligence
+    console.log('Analyzing voting patterns...');
+    const votingIntel = await analyzeVotingPatterns(daoSpace);
+
+    // 3. Generate new proposal using Claude with intelligence context
+    console.log('Generating context-aware proposal with Claude...');
     const generatedProposal = await generateProposal({
       daoName: daoSpace,
       idea,
       pastProposals: proposalTexts,
+      votingIntelligence: votingIntel,
     });
 
     return NextResponse.json({
       success: true,
       proposal: generatedProposal,
       analyzedProposals: pastProposals.length,
+      usedIntelligence: votingIntel !== null,
     });
   } catch (error) {
     console.error('Proposal generation error:', error);
