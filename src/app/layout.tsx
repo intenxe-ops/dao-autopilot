@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DAO Autopilot — Autonomous Governance Infrastructure",
-  description: "AI-driven governance infrastructure. Generate proposals. Analyze votes. Automate operations.",
+  title: "DAO Autopilot — Governance Intelligence for Protocol DAOs",
+  description: "AI-driven governance infrastructure with behavioral intelligence. Generate context-aware DAO proposals optimized for voting patterns, power distribution, and proven success criteria.",
 };
 
 export default function RootLayout({
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

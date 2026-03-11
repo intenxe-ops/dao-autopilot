@@ -1,8 +1,19 @@
+"use client";
+
+import { useState } from "react";
+import { useAuth } from "@/lib/auth-context";
+import SignInModal from "@/components/SignInModal";
 import ProposalGenerator from "@/components/ProposalGenerator";
 
 export default function Home() {
+  const { user, signOut } = useAuth();
+  const [showSignIn, setShowSignIn] = useState(false);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#0f0f0f]">
+      {/* Sign In Modal */}
+      <SignInModal isOpen={showSignIn} onClose={() => setShowSignIn(false)} />
+
       {/* Subtle grid overlay */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none">
         <div className="absolute inset-0" 
@@ -14,6 +25,36 @@ export default function Home() {
             backgroundSize: '100px 100px'
           }}
         />
+      </div>
+
+      {/* Header with Auth */}
+      <div className="container mx-auto px-4 py-6 relative">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div className="text-xs font-mono text-[#666666] tracking-[0.2em]">
+            DAO AUTOPILOT
+          </div>
+          
+          {user ? (
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-[#808080] font-mono">
+                {user.email}
+              </span>
+              <button
+                onClick={() => signOut()}
+                className="text-xs font-mono text-[#666666] hover:text-white transition-colors tracking-wider cursor-pointer"
+              >
+                SIGN OUT
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowSignIn(true)}
+              className="text-xs font-mono text-[#808080] hover:text-white transition-colors tracking-wider cursor-pointer"
+            >
+              SIGN IN
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="container mx-auto px-4 py-12 md:py-20 relative">
@@ -37,14 +78,25 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <a
-                href="#generate"
-                className="group px-8 py-5 bg-white text-black font-mono text-xs md:text-sm tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 text-center cursor-pointer"
-              >
-                <span className="inline-block group-hover:translate-x-0.5 transition-transform">
-                  START FREE
-                </span>
-              </a>
+              {user ? (
+                <a
+                  href="#generate"
+                  className="group px-8 py-5 bg-white text-black font-mono text-xs md:text-sm tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 text-center cursor-pointer"
+                >
+                  <span className="inline-block group-hover:translate-x-0.5 transition-transform">
+                    START BUILDING
+                  </span>
+                </a>
+              ) : (
+                <button
+                  onClick={() => setShowSignIn(true)}
+                  className="group px-8 py-5 bg-white text-black font-mono text-xs md:text-sm tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 text-center cursor-pointer"
+                >
+                  <span className="inline-block group-hover:translate-x-0.5 transition-transform">
+                    START FREE
+                  </span>
+                </button>
+              )}
 
               <a
                 href="https://github.com/intenxe-ops/dao-autopilot"
@@ -144,7 +196,27 @@ export default function Home() {
             </h2>
           </div>
           
-          <ProposalGenerator />
+          {user ? (
+            <ProposalGenerator />
+          ) : (
+            <div className="bg-[#0f0f0f] border border-white/10 p-12 md:p-20 text-center">
+              <p className="text-[10px] font-mono tracking-[0.2em] text-[#666666] mb-6">
+                AUTHENTICATION REQUIRED
+              </p>
+              <h3 className="text-2xl md:text-3xl font-light text-white mb-6 tracking-tight">
+                Sign in to generate proposals
+              </h3>
+              <p className="text-sm text-[#999999] mb-8 font-light max-w-md mx-auto">
+                Create an account to access the proposal generator and voting intelligence.
+              </p>
+              <button
+                onClick={() => setShowSignIn(true)}
+                className="px-8 py-4 bg-white text-black font-mono text-xs tracking-[0.2em] hover:bg-[#e0e0e0] transition-all cursor-pointer"
+              >
+                SIGN IN
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
