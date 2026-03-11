@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { checkUsageLimit, trackProposalGeneration, type UsageStats } from "@/lib/usage-tracking";
 import { TOP_DAOS } from "@/lib/dao-data";
 import { fetchDAOStats, type DAOStats } from "@/lib/snapshot-api";
 import { analyzeVotingPatterns, type VotingIntelligence } from "@/lib/voting-analysis";
 
 export default function ProposalGenerator() {
+  const { user, walletAddress, supabase } = useAuth();
   const [daoSpace, setDaoSpace] = useState("");
   const [idea, setIdea] = useState("");
   const [proposal, setProposal] = useState("");
@@ -19,6 +22,20 @@ export default function ProposalGenerator() {
   const [downloaded, setDownloaded] = useState(false);
   const [votingIntel, setVotingIntel] = useState<VotingIntelligence | null>(null);
   const [loadingIntel, setLoadingIntel] = useState(false);
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+  const [loadingUsage, setLoadingUsage] = useState(true);
+
+  // Load usage stats on mount
+  useEffect(() => {
+    loadUsageStats();
+  }, [user, walletAddress]);
+
+  const loadUsageStats = async () => {
+    setLoadingUsage(true);
+    const stats = await checkUsageLimit(supabase, user?.id || null, walletAddress);
+    setUsageStats(stats);
+    setLoadingUsage(false);
+  };
 
   // Timer effect
   useEffect(() => {
@@ -38,7 +55,6 @@ export default function ProposalGenerator() {
       setLoadingStats(true);
       setLoadingIntel(true);
       
-      // Fetch both stats and voting intelligence
       Promise.all([
         fetchDAOStats(daoSpace),
         analyzeVotingPatterns(daoSpace)
@@ -103,6 +119,11 @@ export default function ProposalGenerator() {
   const handleGenerate = async () => {
     if (!daoSpace || !idea) return;
 
+    // Check usage limit
+    if (!usageStats?.canGenerate) {
+      return; // Blocked by limit
+    }
+
     setLoading(true);
     setProposal("");
 
@@ -117,6 +138,18 @@ export default function ProposalGenerator() {
       
       if (data.success) {
         setProposal(data.proposal);
+        
+        // Track proposal generation
+        await trackProposalGeneration(
+          supabase,
+          user?.id || null,
+          walletAddress,
+          daoSpace,
+          data.proposal
+        );
+
+        // Reload usage stats
+        await loadUsageStats();
       } else {
         setProposal("Error: " + data.error);
       }
@@ -147,8 +180,45 @@ export default function ProposalGenerator() {
     setTimeout(() => setDownloaded(false), 2000);
   };
 
+  const isLimitReached = usageStats && !usageStats.canGenerate;
+
   return (
     <div className="space-y-8">
+      {/* Usage Stats Banner */}
+      {usageStats && !usageStats.isPro && (
+        <div className={`border p-4 md:p-6 ${
+          isLimitReached 
+            ? 'bg-[#1a0a0a] border-white/20' 
+            : 'bg-black/40 border-white/[0.05]'
+        }`}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <p className="text-[10px] font-mono tracking-[0.2em] text-[#666666] mb-2">
+                {isLimitReached ? 'LIMIT REACHED' : 'FREE TIER'}
+              </p>
+              <p className="text-sm md:text-base text-white font-light">
+                <span className="text-lg md:text-2xl font-normal">{usageStats.proposalsThisMonth}</span>
+                <span className="text-[#666666]"> / {usageStats.limit}</span>
+                <span className="text-[#808080] ml-2">proposals this month</span>
+              </p>
+            </div>
+            {isLimitReached && (
+              <a
+                href="mailto:ops@intenxe.xyz?subject=Upgrade to Pro"
+                className="px-6 py-3 bg-white text-black font-mono text-xs tracking-[0.15em] hover:bg-[#e0e0e0] transition-all cursor-pointer whitespace-nowrap"
+              >
+                UPGRADE TO PRO
+              </a>
+            )}
+          </div>
+          {isLimitReached && (
+            <p className="text-xs text-[#999999] mt-4 font-light">
+              Free tier limit reached. Upgrade to Pro for unlimited proposals.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Input Form */}
       <div className="bg-[#0f0f0f] border border-white/[0.08] p-6 md:p-12">
         <div className="space-y-8">
@@ -165,13 +235,13 @@ export default function ProposalGenerator() {
                   onChange={(e) => setDaoSpace(e.target.value)}
                   onFocus={() => setShowDropdown(true)}
                   placeholder="Select DAO or enter space name"
-                  disabled={loading || !!proposal}
+                  disabled={loading || !!proposal || !!isLimitReached}
                   className="flex-1 px-0 py-3 md:py-4 bg-transparent border-b border-white/[0.08] text-white placeholder-[#404040] focus:outline-none focus:border-white/20 transition-colors font-light text-base md:text-lg tracking-tight disabled:opacity-30 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
                   onClick={() => setShowDropdown(!showDropdown)}
-                  disabled={loading || !!proposal}
+                  disabled={loading || !!proposal || !!isLimitReached}
                   className="px-4 py-2 border-b border-white/[0.08] text-[#666666] hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -181,7 +251,7 @@ export default function ProposalGenerator() {
               </div>
 
               {/* Dropdown */}
-              {showDropdown && !loading && !proposal && (
+              {showDropdown && !loading && !proposal && !isLimitReached && (
                 <div className="absolute z-10 w-full mt-2 bg-[#0f0f0f] border border-white/[0.08] max-h-[400px] overflow-y-auto">
                   {/* Search */}
                   <div className="p-3 border-b border-white/[0.05]">
@@ -432,7 +502,7 @@ export default function ProposalGenerator() {
               onChange={(e) => setIdea(e.target.value)}
               placeholder="Describe your proposal..."
               rows={6}
-              disabled={loading || !!proposal}
+              disabled={loading || !!proposal || !!isLimitReached}
               className="w-full px-0 py-3 md:py-4 bg-transparent border-b border-white/[0.08] text-white placeholder-[#404040] focus:outline-none focus:border-white/20 transition-colors resize-none font-light text-base md:text-lg leading-relaxed tracking-tight disabled:opacity-30 disabled:cursor-not-allowed"
             />
             <p className="text-xs text-[#404040] mt-3 font-light tracking-wide">
@@ -459,11 +529,11 @@ export default function ProposalGenerator() {
             ) : (
               <button
                 onClick={handleGenerate}
-                disabled={loading || !daoSpace || !idea}
+                disabled={loading || !daoSpace || !idea || !!isLimitReached}
                 className="group w-full px-8 py-5 bg-white text-black font-mono text-xs tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white cursor-pointer"
               >
                 <span className="inline-block group-hover:translate-x-0.5 transition-transform">
-                  {loading ? `EXECUTING... ${elapsedTime.toFixed(1)}s` : "GENERATE PROPOSAL"}
+                  {loading ? `EXECUTING... ${elapsedTime.toFixed(1)}s` : isLimitReached ? 'LIMIT REACHED - UPGRADE TO PRO' : "GENERATE PROPOSAL"}
                 </span>
               </button>
             )}
