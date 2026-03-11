@@ -1,6 +1,8 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
+import { useAccount, useConnect } from "wagmi";
+import { useEffect } from "react";
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -8,7 +10,23 @@ interface SignInModalProps {
 }
 
 export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
-  const { signInWithGoogle, signInWithWallet } = useAuth();
+  const { signInWithGoogle } = useAuth();
+  const { isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+
+  // Auto-close modal when wallet connects
+  useEffect(() => {
+    if (isConnected) {
+      onClose();
+    }
+  }, [isConnected, onClose]);
+
+  const handleMetaMaskConnect = () => {
+    const metaMaskConnector = connectors[0]; // injected MetaMask connector
+    if (metaMaskConnector) {
+      connect({ connector: metaMaskConnector });
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -65,18 +83,16 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
             CONTINUE WITH GOOGLE
           </button>
 
-          {/* Wallet Connect */}
+          {/* MetaMask Connect */}
           <button
-            onClick={signInWithWallet}
+            onClick={handleMetaMaskConnect}
             className="w-full px-6 py-4 bg-transparent text-white border border-white/10 font-mono text-xs tracking-[0.15em] hover:bg-white/5 transition-all cursor-pointer flex items-center justify-center gap-3"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="3" y="6" width="18" height="12" rx="2"/>
-              <path d="M3 10h18"/>
-              <path d="M7 14h.01"/>
-              <path d="M11 14h2"/>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M21.5 7.5l-7-5.5-7 5.5v9l7 5.5 7-5.5v-9z" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M14.5 2v7.5M9.5 2v7.5M3 12h18M7 16.5h10" stroke="currentColor" strokeWidth="1.5"/>
             </svg>
-            CONNECT WALLET
+            CONNECT METAMASK
           </button>
         </div>
 

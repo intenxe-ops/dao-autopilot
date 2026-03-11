@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
+import { useAccount, useDisconnect } from "wagmi";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,9 +11,9 @@ const supabase = createClient(
 
 interface AuthContextType {
   user: User | null;
+  walletAddress: string | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
-  signInWithWallet: () => Promise<void>;
   signOut: () => Promise<void>;
   supabase: SupabaseClient;
 }
@@ -22,9 +23,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
 
   useEffect(() => {
-    // Check active session
+    // Check active Supabase session (for Google auth)
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
@@ -40,6 +44,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Create/update wallet user profile in Supabase when wallet connects
+  useEffect(() => {
+    if (isConnected && address) {
+      createWalletProfile(address);
+    }
+  }, [isConnected, address]);
+
+  const createWalletProfile = async (walletAddress: string) => {
+    try {
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('wallet_address', walletAddress.toLowerCase())
+        .single();
+
+      if (!existingProfile) {
+        // Generate UUID for wallet user (since they don't have auth.users entry)
+        const walletUserId = crypto.randomUUID();
+        
+        // Create new profile for wallet user
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            id: walletUserId,
+            wallet_address: walletAddress.toLowerCase(),
+            tier: 'free',
+            auth_type: 'wallet',
+            created_at: new Date().toISOString(),
+          });
+
+        if (error) {
+          console.error('Error creating wallet profile:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error in createWalletProfile:', error);
+    }
+  };
+
+  // For wallet auth, we just check if wallet is connected
+  const walletAddress = isConnected ? address || null : null;
+
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -49,22 +96,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const signInWithWallet = async () => {
-    // Using Web3Auth or similar for wallet connect
-    // For now, we'll use a simple implementation
-    // You'll need to add @web3modal/wagmi or similar
-    console.log("Wallet sign in - implement with Web3Modal");
-    
-    // Placeholder - will implement proper wallet connect
-    alert("Wallet connect coming soon. Use Google for now.");
-  };
-
   const signOut = async () => {
+    // Sign out of Supabase (if Google user)
     await supabase.auth.signOut();
+    
+    // Disconnect wallet (if wallet user)
+    if (isConnected) {
+      disconnect();
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithWallet, signOut, supabase }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      walletAddress,
+      loading, 
+      signInWithGoogle, 
+      signOut, 
+      supabase 
+    }}>
       {children}
     </AuthContext.Provider>
   );

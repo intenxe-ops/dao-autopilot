@@ -6,7 +6,7 @@ import SignInModal from "@/components/SignInModal";
 import ProposalGenerator from "@/components/ProposalGenerator";
 
 export default function Home() {
-  const { user, signOut } = useAuth();
+  const { user, walletAddress, signOut } = useAuth();
   const [showSignIn, setShowSignIn] = useState(false);
 
   return (
@@ -34,10 +34,12 @@ export default function Home() {
             DAO AUTOPILOT
           </div>
           
-          {user ? (
+          {user || walletAddress ? (
             <div className="flex items-center gap-4">
               <span className="text-xs text-[#808080] font-mono">
-                {user.email}
+                {walletAddress 
+                  ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                  : user?.email}
               </span>
               <button
                 onClick={() => signOut()}
@@ -78,7 +80,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              {user ? (
+              {user || walletAddress ? (
                 <a
                   href="#generate"
                   className="group px-8 py-5 bg-white text-black font-mono text-xs md:text-sm tracking-[0.2em] hover:bg-[#e0e0e0] transition-all duration-200 text-center cursor-pointer"
@@ -196,7 +198,7 @@ export default function Home() {
             </h2>
           </div>
           
-          {user ? (
+          {user || walletAddress ? (
             <ProposalGenerator />
           ) : (
             <div className="bg-[#0f0f0f] border border-white/10 p-12 md:p-20 text-center">
